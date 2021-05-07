@@ -6,7 +6,9 @@ format:
 	./node_modules/.bin/prettier --write .
 
 build:
-	./node_modules/.bin/tsc
+	rm -rf dist; \
+	./node_modules/.bin/tsc; \
+	./node_modules/.bin/prettier --write .
 
 bin:
 	node ./bin/instagram.js
