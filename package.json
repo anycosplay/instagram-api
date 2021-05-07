@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Instagram API",
   "main": "./dist/main.js",
-  "bin":"./bin/instagram",
+  "bin": "./bin/instagram",
   "scripts": {},
   "repository": {
     "type": "git",

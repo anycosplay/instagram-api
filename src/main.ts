@@ -8,7 +8,7 @@ import {
 } from "./types";
 
 export class InstagramAPI {
-  static async get(code: string): Promise<InstagramPostResponse> {
+  static async get(code): Promise<InstagramPostResponse> {
     if (!code) {
       throw new Error("Post code is required.");
     }
@@ -56,6 +56,7 @@ export class InstagramAPI {
         : [],
     };
   }
+  x;
 
   private static mapPostChildren(
     children: InstagramAdditionalDataChildren[]
@@ -71,7 +72,7 @@ export class InstagramAPI {
     });
   }
 
-  private static async mapHtmlPage(html: string) {
+  private static async mapHtmlPage(html) {
     /**
      * Extract id
      */
@@ -149,31 +150,17 @@ export class InstagramAPI {
       caption,
       children: [],
     };
-
-    /*
-    const reelResponse = await InstagramApi.sendHttpRequest(InstagramApi.getReelUrl(regexCodeResult[1]));
-    const reel = JSON.parse(reelResponse.replace('undefined', ''));
-
-    return {
-      id: reel.graphql.shortcode_media.id,
-      code: reel.graphql.shortcode_media.shortcode,
-      is_video: true,
-      url: reel.graphql.shortcode_media.video_url,
-      caption,
-      children: [],
-    };
-    */
   }
 
-  private static getEmbedUrl(postCode: string) {
+  private static getEmbedUrl(postCode) {
     return `https://www.instagram.com/p/${postCode}/embed/captioned/`;
   }
 
-  private static getReelUrl(postCode: string) {
+  private static getReelUrl(postCode) {
     return `https://www.instagram.com/reel/${postCode}/`;
   }
 
-  private static async sendHttpRequest(url: string): Promise<string> {
+  private static async sendHttpRequest(url): Promise<string> {
     return new Promise(function (resolve, reject) {
       https
         .get(url, function (response) {
