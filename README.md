@@ -1,6 +1,6 @@
 # Instagram API
 
-## Install
+## Installation
 
 ```
 npm install https://github.com/anycosplay/instagram-api.git
@@ -9,12 +9,15 @@ npm install https://github.com/anycosplay/instagram-api.git
 ## Usage
 
 ```
-import InstagramApi from "instagram-api";
+const { InstagramAPI } = require("./dist/main");
 
-// https://www.instagram.com/p/CMf29lRF52W/
-const code = "CMf29lRF52W";
+// https://www.instagram.com/p/COjeb41hb17/
+const code = "COjeb41hb17";
 
-InstagramApi.get(code).then((result) => {
+let instagramAPI = new InstagramAPI();
+
+instagramAPI.get(code).then(function (result) {
   console.log(result);
 });
+
 ```

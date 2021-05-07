@@ -137,7 +137,7 @@ exports.InstagramAPI = void 0;
 var https = require("https");
 var InstagramAPI = (function () {
   function InstagramAPI() {}
-  InstagramAPI.get = function (code) {
+  InstagramAPI.prototype.get = function (code) {
     return __awaiter(this, void 0, void 0, function () {
       var htmlPage, regexResults, additionalData;
       return __generator(this, function (_a) {
@@ -155,10 +155,10 @@ var InstagramAPI = (function () {
             regexResults = /window\.__additionalDataLoaded\('extra',(.*?)\);<\/script>/gs.exec(
               htmlPage
             );
-            additionalData = JSON.parse(regexResults[1]);
             if (!regexResults) {
               throw new Error("Regex failed! Could not get additional data");
             }
+            additionalData = JSON.parse(regexResults[1]);
             if (additionalData) {
               return [2, this.mapAdditionalData(additionalData)];
             }
@@ -167,22 +167,23 @@ var InstagramAPI = (function () {
       });
     });
   };
-  InstagramAPI.mapAdditionalData = function (data) {
-    var media = data.shortcode_media;
+  InstagramAPI.prototype.mapAdditionalData = function (data) {
     return {
-      id: media.id,
-      code: media.shortcode,
-      is_video: media.is_video,
-      url: media.video_url || media.display_url,
-      caption: media.edge_media_to_caption
-        ? media.edge_media_to_caption.edges[0].node.text
+      id: data.shortcode_media.id,
+      code: data.shortcode_media.shortcode,
+      is_video: data.shortcode_media.is_video,
+      url: data.shortcode_media.video_url || data.shortcode_media.display_url,
+      caption: data.shortcode_media.edge_media_to_caption
+        ? data.shortcode_media.edge_media_to_caption.edges[0].node.text
         : undefined,
-      children: media.edge_sidecar_to_children
-        ? this.mapPostChildren(media.edge_sidecar_to_children.edges)
+      children: data.shortcode_media.edge_sidecar_to_children
+        ? this.mapPostChildren(
+            data.shortcode_media.edge_sidecar_to_children.edges
+          )
         : [],
     };
   };
-  InstagramAPI.mapPostChildren = function (children) {
+  InstagramAPI.prototype.mapPostChildren = function (children) {
     return children.map(function (edge) {
       return {
         id: edge.node.id,
@@ -192,29 +193,29 @@ var InstagramAPI = (function () {
       };
     });
   };
-  InstagramAPI.mapHtmlPage = function (html) {
+  InstagramAPI.prototype.mapHtmlPage = function (html) {
     return __awaiter(this, void 0, void 0, function () {
       var regexMediaIdResult,
         regexCodeResult,
         regexUrlResult,
-        caption,
         regexCaptionResult,
         regexMediaTypeResult,
         regexVideoUrlResult,
         _a,
-        _b;
+        _b,
+        caption;
       return __generator(this, function (_c) {
         switch (_c.label) {
           case 0:
             regexMediaIdResult = /data-media-id="(.*?)"/gs.exec(html);
-            regexCodeResult = /instagram\.com\/p\/(.*?)\//gs.exec(html);
-            regexUrlResult = /class="Content(.*?)src="(.*?)"/gs.exec(html);
             if (!regexMediaIdResult) {
               throw new Error("Could not extract post media id");
             }
+            regexCodeResult = /instagram\.com\/p\/(.*?)\//gs.exec(html);
             if (!regexCodeResult) {
               throw new Error("Could not extract post code");
             }
+            regexUrlResult = /class="Content(.*?)src="(.*?)"/gs.exec(html);
             if (!regexUrlResult) {
               throw new Error("Could not extract post url");
             }
@@ -229,6 +230,7 @@ var InstagramAPI = (function () {
             ];
           case 1:
             regexVideoUrlResult = _b.apply(_a, [_c.sent()]);
+            caption = "";
             if (regexCaptionResult) {
               caption = regexCaptionResult[3].replace(/<[^>]*>/g, "").trim();
             }
@@ -266,13 +268,13 @@ var InstagramAPI = (function () {
       });
     });
   };
-  InstagramAPI.getEmbedUrl = function (postCode) {
+  InstagramAPI.prototype.getEmbedUrl = function (postCode) {
     return "https://www.instagram.com/p/" + postCode + "/embed/captioned/";
   };
-  InstagramAPI.getReelUrl = function (postCode) {
+  InstagramAPI.prototype.getReelUrl = function (postCode) {
     return "https://www.instagram.com/reel/" + postCode + "/";
   };
-  InstagramAPI.sendHttpRequest = function (url) {
+  InstagramAPI.prototype.sendHttpRequest = function (url) {
     return __awaiter(this, void 0, void 0, function () {
       return __generator(this, function (_a) {
         return [

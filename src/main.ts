@@ -3,7 +3,7 @@ import * as https from "https";
 export class InstagramAPI {
   constructor() {}
 
-  static async get(code) {
+  async get(code) {
     if (!code) {
       throw new Error("Post code is required.");
     }
@@ -16,11 +16,12 @@ export class InstagramAPI {
     const regexResults = /window\.__additionalDataLoaded\('extra',(.*?)\);<\/script>/gs.exec(
       htmlPage
     );
-    const additionalData = JSON.parse(regexResults[1]);
 
     if (!regexResults) {
       throw new Error("Regex failed! Could not get additional data");
     }
+
+    const additionalData = JSON.parse(regexResults[1]);
 
     if (additionalData) {
       return this.mapAdditionalData(additionalData);
@@ -29,25 +30,24 @@ export class InstagramAPI {
     return this.mapHtmlPage(htmlPage);
   }
 
-  static mapAdditionalData(data) {
-    const media = data.shortcode_media;
-
+  mapAdditionalData(data) {
     return {
-      id: media.id,
-      code: media.shortcode,
-      is_video: media.is_video,
-      url: media.video_url || media.display_url,
-      caption: media.edge_media_to_caption
-        ? media.edge_media_to_caption.edges[0].node.text
+      id: data.shortcode_media.id,
+      code: data.shortcode_media.shortcode,
+      is_video: data.shortcode_media.is_video,
+      url: data.shortcode_media.video_url || data.shortcode_media.display_url,
+      caption: data.shortcode_media.edge_media_to_caption
+        ? data.shortcode_media.edge_media_to_caption.edges[0].node.text
         : undefined,
-      children: media.edge_sidecar_to_children
-        ? this.mapPostChildren(media.edge_sidecar_to_children.edges)
+      children: data.shortcode_media.edge_sidecar_to_children
+        ? this.mapPostChildren(
+            data.shortcode_media.edge_sidecar_to_children.edges
+          )
         : [],
     };
   }
-  x;
 
-  static mapPostChildren(children) {
+  mapPostChildren(children) {
     return children.map(function (edge) {
       return {
         id: edge.node.id,
@@ -58,19 +58,20 @@ export class InstagramAPI {
     });
   }
 
-  static async mapHtmlPage(html) {
+  async mapHtmlPage(html) {
     const regexMediaIdResult = /data-media-id="(.*?)"/gs.exec(html);
-    const regexCodeResult = /instagram\.com\/p\/(.*?)\//gs.exec(html);
-    const regexUrlResult = /class="Content(.*?)src="(.*?)"/gs.exec(html);
-    let caption;
 
     if (!regexMediaIdResult) {
       throw new Error("Could not extract post media id");
     }
 
+    const regexCodeResult = /instagram\.com\/p\/(.*?)\//gs.exec(html);
+
     if (!regexCodeResult) {
       throw new Error("Could not extract post code");
     }
+
+    const regexUrlResult = /class="Content(.*?)src="(.*?)"/gs.exec(html);
 
     if (!regexUrlResult) {
       throw new Error("Could not extract post url");
@@ -83,6 +84,7 @@ export class InstagramAPI {
     const regexVideoUrlResult = /property="og:video" content="(.*?)"/.exec(
       await this.sendHttpRequest(this.getReelUrl(regexCodeResult[1]))
     );
+    let caption = "";
 
     if (regexCaptionResult) {
       caption = regexCaptionResult[3].replace(/<[^>]*>/g, "").trim();
@@ -113,15 +115,15 @@ export class InstagramAPI {
     };
   }
 
-  static getEmbedUrl(postCode) {
+  getEmbedUrl(postCode) {
     return `https://www.instagram.com/p/${postCode}/embed/captioned/`;
   }
 
-  static getReelUrl(postCode) {
+  getReelUrl(postCode) {
     return `https://www.instagram.com/reel/${postCode}/`;
   }
 
-  static async sendHttpRequest(url): Promise<string> {
+  async sendHttpRequest(url): Promise<string> {
     return new Promise(function (resolve, reject) {
       https
         .get(url, function (response) {
