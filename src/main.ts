@@ -4,30 +4,34 @@ export class InstagramAPI {
   constructor() {}
 
   async get(code) {
-    if (!code) {
-      throw new Error("Post code is required.");
+    try {
+      if (!code) {
+        throw new Error("Post code is required.");
+      }
+
+      if (!code.match(/^[a-zA-Z0-9_-]*$/gi)) {
+        throw new Error("Invalid post code.");
+      }
+
+      const htmlPage = await this.httpGet(this.getEmbedUrl(code));
+      const regexResults = /window\.__additionalDataLoaded\('extra',(.*?)\);<\/script>/gs.exec(
+        htmlPage
+      );
+
+      if (!regexResults) {
+        throw new Error("Regex failed! Could not get additional data");
+      }
+
+      const additionalData = JSON.parse(regexResults[1]);
+
+      if (additionalData) {
+        return this.mapAdditionalData(additionalData);
+      }
+
+      return this.mapHtmlPage(htmlPage);
+    } catch (err) {
+      console.log(err);
     }
-
-    if (!code.match(/^[a-zA-Z0-9_-]*$/gi)) {
-      throw new Error("Invalid post code.");
-    }
-
-    const htmlPage = await this.sendHttpRequest(this.getEmbedUrl(code));
-    const regexResults = /window\.__additionalDataLoaded\('extra',(.*?)\);<\/script>/gs.exec(
-      htmlPage
-    );
-
-    if (!regexResults) {
-      throw new Error("Regex failed! Could not get additional data");
-    }
-
-    const additionalData = JSON.parse(regexResults[1]);
-
-    if (additionalData) {
-      return this.mapAdditionalData(additionalData);
-    }
-
-    return this.mapHtmlPage(htmlPage);
   }
 
   mapAdditionalData(data) {
@@ -82,7 +86,7 @@ export class InstagramAPI {
     );
     const regexMediaTypeResult = /data-media-type="(.*?)"/gs.exec(html);
     const regexVideoUrlResult = /property="og:video" content="(.*?)"/.exec(
-      await this.sendHttpRequest(this.getReelUrl(regexCodeResult[1]))
+      await this.httpGet(this.getReelUrl(regexCodeResult[1]))
     );
     let caption = "";
 
@@ -123,7 +127,7 @@ export class InstagramAPI {
     return `https://www.instagram.com/reel/${postCode}/`;
   }
 
-  async sendHttpRequest(url): Promise<string> {
+  async httpGet(url): Promise<string> {
     return new Promise(function (resolve, reject) {
       https
         .get(url, function (response) {

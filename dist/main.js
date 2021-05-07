@@ -139,17 +139,18 @@ var InstagramAPI = (function () {
   function InstagramAPI() {}
   InstagramAPI.prototype.get = function (code) {
     return __awaiter(this, void 0, void 0, function () {
-      var htmlPage, regexResults, additionalData;
+      var htmlPage, regexResults, additionalData, err_1;
       return __generator(this, function (_a) {
         switch (_a.label) {
           case 0:
+            _a.trys.push([0, 2, , 3]);
             if (!code) {
               throw new Error("Post code is required.");
             }
             if (!code.match(/^[a-zA-Z0-9_-]*$/gi)) {
               throw new Error("Invalid post code.");
             }
-            return [4, this.sendHttpRequest(this.getEmbedUrl(code))];
+            return [4, this.httpGet(this.getEmbedUrl(code))];
           case 1:
             htmlPage = _a.sent();
             regexResults = /window\.__additionalDataLoaded\('extra',(.*?)\);<\/script>/gs.exec(
@@ -163,6 +164,12 @@ var InstagramAPI = (function () {
               return [2, this.mapAdditionalData(additionalData)];
             }
             return [2, this.mapHtmlPage(htmlPage)];
+          case 2:
+            err_1 = _a.sent();
+            console.log(err_1);
+            return [3, 3];
+          case 3:
+            return [2];
         }
       });
     });
@@ -224,10 +231,7 @@ var InstagramAPI = (function () {
             );
             regexMediaTypeResult = /data-media-type="(.*?)"/gs.exec(html);
             _b = (_a = /property="og:video" content="(.*?)"/).exec;
-            return [
-              4,
-              this.sendHttpRequest(this.getReelUrl(regexCodeResult[1])),
-            ];
+            return [4, this.httpGet(this.getReelUrl(regexCodeResult[1]))];
           case 1:
             regexVideoUrlResult = _b.apply(_a, [_c.sent()]);
             caption = "";
@@ -274,7 +278,7 @@ var InstagramAPI = (function () {
   InstagramAPI.prototype.getReelUrl = function (postCode) {
     return "https://www.instagram.com/reel/" + postCode + "/";
   };
-  InstagramAPI.prototype.sendHttpRequest = function (url) {
+  InstagramAPI.prototype.httpGet = function (url) {
     return __awaiter(this, void 0, void 0, function () {
       return __generator(this, function (_a) {
         return [
