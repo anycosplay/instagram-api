@@ -1,0 +1,26 @@
+{
+  "name": "instagram-api",
+  "version": "0.0.1",
+  "description": "Instagram API",
+  "main": "dist/main.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anycosplay/instagram-api.git"
+  },
+  "homepage": "https://github.com/anycosplay/instagram-api",
+  "bugs": {
+    "url": "https://github.com/anycosplay/instagram-api/issues"
+  },
+  "keywords": [
+    "api"
+  ],
+  "author": "Anonymous",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^15.0.2",
+    "prettier": "2.2.1",
+    "typescript": "^4.2.4"
+  },
+  "dependencies": {}
+}
