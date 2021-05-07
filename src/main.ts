@@ -37,7 +37,7 @@ export class InstagramAPI {
     return InstagramAPI.mapHtmlPage(htmlPage);
   }
 
-  private static mapAdditionalData(
+  static mapAdditionalData(
     data: InstagramAdditionalDataResponse
   ): InstagramPostResponse {
     const media = data.shortcode_media;
@@ -58,7 +58,7 @@ export class InstagramAPI {
   }
   x;
 
-  private static mapPostChildren(
+  static mapPostChildren(
     children: InstagramAdditionalDataChildren[]
   ): InstagramPostChild[] {
     return children.map(function (edge) {
@@ -72,7 +72,7 @@ export class InstagramAPI {
     });
   }
 
-  private static async mapHtmlPage(html) {
+  static async mapHtmlPage(html) {
     /**
      * Extract id
      */
@@ -152,15 +152,15 @@ export class InstagramAPI {
     };
   }
 
-  private static getEmbedUrl(postCode) {
+  static getEmbedUrl(postCode) {
     return `https://www.instagram.com/p/${postCode}/embed/captioned/`;
   }
 
-  private static getReelUrl(postCode) {
+  static getReelUrl(postCode) {
     return `https://www.instagram.com/reel/${postCode}/`;
   }
 
-  private static async sendHttpRequest(url): Promise<string> {
+  static async sendHttpRequest(url): Promise<string> {
     return new Promise(function (resolve, reject) {
       https
         .get(url, function (response) {
