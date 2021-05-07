@@ -224,10 +224,19 @@ var InstagramAPI = (function () {
             regexCaptionResult = /class="Caption"(.*?)class="CaptionUsername"(.*?)<\/a>(.*?)<div/gs.exec(
               html
             );
+            regexMediaTypeResult = /data-media-type="(.*?)"/gs.exec(html);
+            _b = (_a = /property="og:video" content="(.*?)"/).exec;
+            return [
+              4,
+              InstagramAPI.sendHttpRequest(
+                InstagramAPI.getReelUrl(regexCodeResult[1])
+              ),
+            ];
+          case 1:
+            regexVideoUrlResult = _b.apply(_a, [_c.sent()]);
             if (regexCaptionResult) {
               caption = regexCaptionResult[3].replace(/<[^>]*>/g, "").trim();
             }
-            regexMediaTypeResult = /data-media-type="(.*?)"/gs.exec(html);
             if (
               regexMediaTypeResult &&
               regexMediaTypeResult[1] !== "GraphVideo"
@@ -244,15 +253,6 @@ var InstagramAPI = (function () {
                 },
               ];
             }
-            _b = (_a = /property="og:video" content="(.*?)"/).exec;
-            return [
-              4,
-              InstagramAPI.sendHttpRequest(
-                InstagramAPI.getReelUrl(regexCodeResult[1])
-              ),
-            ];
-          case 1:
-            regexVideoUrlResult = _b.apply(_a, [_c.sent()]);
             if (!regexVideoUrlResult) {
               throw new Error("Could not fetch reel video url");
             }

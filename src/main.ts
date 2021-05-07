@@ -8,7 +8,9 @@ import {
 } from "./types";
 
 export class InstagramAPI {
-  static async get(code): Promise<InstagramPostResponse> {
+  constructor() {}
+
+  static async get(code) {
     if (!code) {
       throw new Error("Post code is required.");
     }
@@ -20,7 +22,6 @@ export class InstagramAPI {
     const htmlPage = await InstagramAPI.sendHttpRequest(
       InstagramAPI.getEmbedUrl(code)
     );
-
     const regexResults = /window\.__additionalDataLoaded\('extra',(.*?)\);<\/script>/gs.exec(
       htmlPage
     );
@@ -37,13 +38,10 @@ export class InstagramAPI {
     return InstagramAPI.mapHtmlPage(htmlPage);
   }
 
-  static mapAdditionalData(
-    data: InstagramAdditionalDataResponse
-  ): InstagramPostResponse {
+  static mapAdditionalData(data) {
     const media = data.shortcode_media;
 
     return {
-      // type: media.__typename,
       id: media.id,
       code: media.shortcode,
       is_video: media.is_video,
@@ -73,51 +71,38 @@ export class InstagramAPI {
   }
 
   static async mapHtmlPage(html) {
-    /**
-     * Extract id
-     */
     const regexMediaIdResult = /data-media-id="(.*?)"/gs.exec(html);
 
     if (!regexMediaIdResult) {
       throw new Error("Could not extract post media id");
     }
 
-    /**
-     * Extract code
-     */
     const regexCodeResult = /instagram\.com\/p\/(.*?)\//gs.exec(html);
 
     if (!regexCodeResult) {
       throw new Error("Could not extract post code");
     }
 
-    /**
-     * Extract url
-     */
     const regexUrlResult = /class="Content(.*?)src="(.*?)"/gs.exec(html);
 
     if (!regexUrlResult) {
       throw new Error("Could not extract post url");
     }
 
-    /**
-     * Extract caption
-     */
     let caption;
     const regexCaptionResult = /class="Caption"(.*?)class="CaptionUsername"(.*?)<\/a>(.*?)<div/gs.exec(
       html
     );
-    /**
-     * Replace all html tags and trim the result
-     */
+    const regexMediaTypeResult = /data-media-type="(.*?)"/gs.exec(html);
+    const regexVideoUrlResult = /property="og:video" content="(.*?)"/.exec(
+      await InstagramAPI.sendHttpRequest(
+        InstagramAPI.getReelUrl(regexCodeResult[1])
+      )
+    );
+
     if (regexCaptionResult) {
       caption = regexCaptionResult[3].replace(/<[^>]*>/g, "").trim();
     }
-
-    /**
-     * If the media type is not reel video, return the photo
-     */
-    const regexMediaTypeResult = /data-media-type="(.*?)"/gs.exec(html);
 
     if (regexMediaTypeResult && regexMediaTypeResult[1] !== "GraphVideo") {
       return {
@@ -130,18 +115,10 @@ export class InstagramAPI {
       };
     }
 
-    /**
-     * Request to fetch reel video url
-     */
-    const regexVideoUrlResult = /property="og:video" content="(.*?)"/.exec(
-      await InstagramAPI.sendHttpRequest(
-        InstagramAPI.getReelUrl(regexCodeResult[1])
-      )
-    );
-
     if (!regexVideoUrlResult) {
       throw new Error("Could not fetch reel video url");
     }
+
     return {
       id: regexMediaIdResult[1],
       code: regexCodeResult[1],
