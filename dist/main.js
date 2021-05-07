@@ -149,10 +149,7 @@ var InstagramAPI = (function () {
             if (!code.match(/^[a-zA-Z0-9_-]*$/gi)) {
               throw new Error("Invalid post code.");
             }
-            return [
-              4,
-              InstagramAPI.sendHttpRequest(InstagramAPI.getEmbedUrl(code)),
-            ];
+            return [4, this.sendHttpRequest(this.getEmbedUrl(code))];
           case 1:
             htmlPage = _a.sent();
             regexResults = /window\.__additionalDataLoaded\('extra',(.*?)\);<\/script>/gs.exec(
@@ -163,9 +160,9 @@ var InstagramAPI = (function () {
               throw new Error("Regex failed! Could not get additional data");
             }
             if (additionalData) {
-              return [2, InstagramAPI.mapAdditionalData(additionalData)];
+              return [2, this.mapAdditionalData(additionalData)];
             }
-            return [2, InstagramAPI.mapHtmlPage(htmlPage)];
+            return [2, this.mapHtmlPage(htmlPage)];
         }
       });
     });
@@ -181,7 +178,7 @@ var InstagramAPI = (function () {
         ? media.edge_media_to_caption.edges[0].node.text
         : undefined,
       children: media.edge_sidecar_to_children
-        ? InstagramAPI.mapPostChildren(media.edge_sidecar_to_children.edges)
+        ? this.mapPostChildren(media.edge_sidecar_to_children.edges)
         : [],
     };
   };
@@ -210,14 +207,14 @@ var InstagramAPI = (function () {
         switch (_c.label) {
           case 0:
             regexMediaIdResult = /data-media-id="(.*?)"/gs.exec(html);
+            regexCodeResult = /instagram\.com\/p\/(.*?)\//gs.exec(html);
+            regexUrlResult = /class="Content(.*?)src="(.*?)"/gs.exec(html);
             if (!regexMediaIdResult) {
               throw new Error("Could not extract post media id");
             }
-            regexCodeResult = /instagram\.com\/p\/(.*?)\//gs.exec(html);
             if (!regexCodeResult) {
               throw new Error("Could not extract post code");
             }
-            regexUrlResult = /class="Content(.*?)src="(.*?)"/gs.exec(html);
             if (!regexUrlResult) {
               throw new Error("Could not extract post url");
             }
@@ -228,9 +225,7 @@ var InstagramAPI = (function () {
             _b = (_a = /property="og:video" content="(.*?)"/).exec;
             return [
               4,
-              InstagramAPI.sendHttpRequest(
-                InstagramAPI.getReelUrl(regexCodeResult[1])
-              ),
+              this.sendHttpRequest(this.getReelUrl(regexCodeResult[1])),
             ];
           case 1:
             regexVideoUrlResult = _b.apply(_a, [_c.sent()]);
